@@ -1,4 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+//import { NgForm} from '@angular/forms';
+import {Router} from '@angular/router';
+//import { FlashMessagesService } from 'angular2-flash-messages';
+import { Client } from '../../models/client';
+import { ClientService } from '../../services/client.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-add-client',
@@ -6,10 +12,38 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./add-client.component.css']
 })
 export class AddClientComponent implements OnInit {
+	client: Client = {
+		firstName: '',
+		lastName: '',
+		email: '',
+		phone: '',
+		balance: 0
+	}
 
-  constructor() { }
+	disableBalanceOnAdd: boolean = false;
+
+  constructor(
+    private router: Router,
+    private clientService: ClientService,
+    private settingsService: SettingsService
+    ) { }
 
   ngOnInit() {
+    this.disableBalanceOnAdd = this.settingsService.getSettings().disableBalanceOnAdd;
+  }
+
+  onSubmit({value, valid}: {value: Client, valid: boolean}) {
+  	if(this.disableBalanceOnAdd) {
+  		value.balance = 0;
+  	}
+  	if(!valid) {
+  		this.router.navigate(['add-client']);
+  		//this._flashMessagesService.show('Please fill all fields!', { cssClass: 'alert-danger', timeout: 1000 });
+  	} else {
+  		//console.log('valid holla!');
+  		this.clientService.newClient(value);
+  		this.router.navigate(['/']);
+  	}
   }
 
 }

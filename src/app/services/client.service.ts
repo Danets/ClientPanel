@@ -1,20 +1,36 @@
 import { Injectable } from '@angular/core';
-//import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from '';
-import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database-deprecated';
 import { Observable } from 'rxjs/Observable';
 import { Client } from '../models/client';
 
 @Injectable()
 export class ClientService {
-  clients: Observable<any[]>;
-  client: Observable<any>;
+  clients: FirebaseListObservable<any[]>;
+  client: FirebaseObjectObservable<any>;
 
-  constructor(db: AngularFirestore) {
-    this.clients = db.collection('clients').valueChanges();
+  constructor(private db: AngularFireDatabase) {
+    this.clients = this.db.list('/clients') as FirebaseListObservable<Client[]>;
   }
 
   getClients() {
     return this.clients;
+  }
+
+  newClient(client: Client) {
+  	this.clients.push(client);
+  }
+
+  getClient(id:string) {
+  	this.client = this.db.object('/clients/'+id) as FirebaseObjectObservable<Client>;
+  	return this.client;
+  }
+
+  updateClient(id: string, client: Client) {
+  	return this.clients.update(id, client); 
+  }
+
+  deleteClient(id: string,) {
+  	return this.clients.remove(id);
   }
 
 }
